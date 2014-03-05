@@ -1,12 +1,12 @@
-// Copyright (c) 2011-2014 The Bitcoin developers
+// Copyright (c) 2011-2014 The Cockcoin developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #if defined(HAVE_CONFIG_H)
-#include "bitcoin-config.h"
+#include "cockcoin-config.h"
 #endif
 
-#include "bitcoingui.h"
+#include "cockcoingui.h"
 
 #include "clientmodel.h"
 #include "guiconstants.h"
@@ -70,7 +70,7 @@ static void InitMessage(const std::string &message)
  */
 static std::string Translate(const char* psz)
 {
-    return QCoreApplication::translate("bitcoin-core", psz).toStdString();
+    return QCoreApplication::translate("cockcoin-core", psz).toStdString();
 }
 
 /** Set up translations */
@@ -104,11 +104,11 @@ static void initTranslations(QTranslator &qtTranslatorBase, QTranslator &qtTrans
     if (qtTranslator.load("qt_" + lang_territory, QLibraryInfo::location(QLibraryInfo::TranslationsPath)))
         QApplication::installTranslator(&qtTranslator);
 
-    // Load e.g. bitcoin_de.qm (shortcut "de" needs to be defined in bitcoin.qrc)
+    // Load e.g. cockcoin_de.qm (shortcut "de" needs to be defined in cockcoin.qrc)
     if (translatorBase.load(lang, ":/translations/"))
         QApplication::installTranslator(&translatorBase);
 
-    // Load e.g. bitcoin_de_DE.qm (shortcut "de_DE" needs to be defined in bitcoin.qrc)
+    // Load e.g. cockcoin_de_DE.qm (shortcut "de_DE" needs to be defined in cockcoin.qrc)
     if (translator.load(lang_territory, ":/translations/"))
         QApplication::installTranslator(&translator);
 }
@@ -129,14 +129,14 @@ void DebugMessageHandler(QtMsgType type, const QMessageLogContext& context, cons
 }
 #endif
 
-/** Class encapsulating Bitcoin Core startup and shutdown.
+/** Class encapsulating Cockcoin Core startup and shutdown.
  * Allows running startup and shutdown in a different thread from the UI thread.
  */
-class BitcoinCore: public QObject
+class CockcoinCore: public QObject
 {
     Q_OBJECT
 public:
-    explicit BitcoinCore();
+    explicit CockcoinCore();
 
 public slots:
     void initialize();
@@ -154,13 +154,13 @@ private:
     void handleRunawayException(std::exception *e);
 };
 
-/** Main Bitcoin application object */
-class BitcoinApplication: public QApplication
+/** Main Cockcoin application object */
+class CockcoinApplication: public QApplication
 {
     Q_OBJECT
 public:
-    explicit BitcoinApplication(int &argc, char **argv);
-    ~BitcoinApplication();
+    explicit CockcoinApplication(int &argc, char **argv);
+    ~CockcoinApplication();
 
 #ifdef ENABLE_WALLET
     /// Create payment server
@@ -197,7 +197,7 @@ private:
     QThread *coreThread;
     OptionsModel *optionsModel;
     ClientModel *clientModel;
-    BitcoinGUI *window;
+    CockcoinGUI *window;
     QTimer *pollShutdownTimer;
 #ifdef ENABLE_WALLET
     PaymentServer* paymentServer;
@@ -208,20 +208,20 @@ private:
     void startThread();
 };
 
-#include "bitcoin.moc"
+#include "cockcoin.moc"
 
-BitcoinCore::BitcoinCore():
+CockcoinCore::CockcoinCore():
     QObject()
 {
 }
 
-void BitcoinCore::handleRunawayException(std::exception *e)
+void CockcoinCore::handleRunawayException(std::exception *e)
 {
     PrintExceptionContinue(e, "Runaway exception");
     emit runawayException(QString::fromStdString(strMiscWarning));
 }
 
-void BitcoinCore::initialize()
+void CockcoinCore::initialize()
 {
     try
     {
@@ -242,7 +242,7 @@ void BitcoinCore::initialize()
     }
 }
 
-void BitcoinCore::shutdown()
+void CockcoinCore::shutdown()
 {
     try
     {
@@ -259,7 +259,7 @@ void BitcoinCore::shutdown()
     }
 }
 
-BitcoinApplication::BitcoinApplication(int &argc, char **argv):
+CockcoinApplication::CockcoinApplication(int &argc, char **argv):
     QApplication(argc, argv),
     coreThread(0),
     optionsModel(0),
@@ -276,7 +276,7 @@ BitcoinApplication::BitcoinApplication(int &argc, char **argv):
     startThread();
 }
 
-BitcoinApplication::~BitcoinApplication()
+CockcoinApplication::~CockcoinApplication()
 {
     LogPrintf("Stopping thread\n");
     emit stopThread();
@@ -294,27 +294,27 @@ BitcoinApplication::~BitcoinApplication()
 }
 
 #ifdef ENABLE_WALLET
-void BitcoinApplication::createPaymentServer()
+void CockcoinApplication::createPaymentServer()
 {
     paymentServer = new PaymentServer(this);
 }
 #endif
 
-void BitcoinApplication::createOptionsModel()
+void CockcoinApplication::createOptionsModel()
 {
     optionsModel = new OptionsModel();
 }
 
-void BitcoinApplication::createWindow(bool isaTestNet)
+void CockcoinApplication::createWindow(bool isaTestNet)
 {
-    window = new BitcoinGUI(isaTestNet, 0);
+    window = new CockcoinGUI(isaTestNet, 0);
 
     pollShutdownTimer = new QTimer(window);
     connect(pollShutdownTimer, SIGNAL(timeout()), window, SLOT(detectShutdown()));
     pollShutdownTimer->start(200);
 }
 
-void BitcoinApplication::createSplashScreen(bool isaTestNet)
+void CockcoinApplication::createSplashScreen(bool isaTestNet)
 {
     SplashScreen *splash = new SplashScreen(QPixmap(), 0, isaTestNet);
     splash->setAttribute(Qt::WA_DeleteOnClose);
@@ -322,10 +322,10 @@ void BitcoinApplication::createSplashScreen(bool isaTestNet)
     connect(this, SIGNAL(splashFinished(QWidget*)), splash, SLOT(slotFinish(QWidget*)));
 }
 
-void BitcoinApplication::startThread()
+void CockcoinApplication::startThread()
 {
     coreThread = new QThread(this);
-    BitcoinCore *executor = new BitcoinCore();
+    CockcoinCore *executor = new CockcoinCore();
     executor->moveToThread(coreThread);
 
     /*  communication to and from thread */
@@ -341,13 +341,13 @@ void BitcoinApplication::startThread()
     coreThread->start();
 }
 
-void BitcoinApplication::requestInitialize()
+void CockcoinApplication::requestInitialize()
 {
     LogPrintf("Requesting initialize\n");
     emit requestedInitialize();
 }
 
-void BitcoinApplication::requestShutdown()
+void CockcoinApplication::requestShutdown()
 {
     LogPrintf("Requesting shutdown\n");
     window->hide();
@@ -369,7 +369,7 @@ void BitcoinApplication::requestShutdown()
     emit requestedShutdown();
 }
 
-void BitcoinApplication::initializeResult(int retval)
+void CockcoinApplication::initializeResult(int retval)
 {
     LogPrintf("Initialization result: %i\n", retval);
     // Set exit result: 0 if successful, 1 if failure
@@ -410,7 +410,7 @@ void BitcoinApplication::initializeResult(int retval)
         }
 #ifdef ENABLE_WALLET
         // Now that initialization/startup is done, process any command-line
-        // bitcoin: URIs or payment requests:
+        // cockcoin: URIs or payment requests:
         connect(paymentServer, SIGNAL(receivedPaymentRequest(SendCoinsRecipient)),
                          window, SLOT(handlePaymentRequest(SendCoinsRecipient)));
         connect(window, SIGNAL(receivedURI(QString)),
@@ -424,19 +424,19 @@ void BitcoinApplication::initializeResult(int retval)
     }
 }
 
-void BitcoinApplication::shutdownResult(int retval)
+void CockcoinApplication::shutdownResult(int retval)
 {
     LogPrintf("Shutdown result: %i\n", retval);
     quit(); // Exit main loop after shutdown finished
 }
 
-void BitcoinApplication::handleRunawayException(const QString &message)
+void CockcoinApplication::handleRunawayException(const QString &message)
 {
-    QMessageBox::critical(0, "Runaway exception", BitcoinGUI::tr("A fatal error occurred. Bitcoin can no longer continue safely and will quit.") + QString("\n\n") + message);
+    QMessageBox::critical(0, "Runaway exception", CockcoinGUI::tr("A fatal error occurred. Cockcoin can no longer continue safely and will quit.") + QString("\n\n") + message);
     ::exit(1);
 }
 
-#ifndef BITCOIN_QT_TEST
+#ifndef COCKCOIN_QT_TEST
 int main(int argc, char *argv[])
 {
     bool fSelParFromCLFailed = false;
@@ -464,8 +464,8 @@ int main(int argc, char *argv[])
     QTextCodec::setCodecForCStrings(QTextCodec::codecForTr());
 #endif
 
-    Q_INIT_RESOURCE(bitcoin);
-    BitcoinApplication app(argc, argv);
+    Q_INIT_RESOURCE(cockcoin);
+    CockcoinApplication app(argc, argv);
 #if QT_VERSION > 0x050100
     // Generate high-dpi pixmaps
     QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
@@ -480,12 +480,12 @@ int main(int argc, char *argv[])
     /// 3. Application identification
     // must be set before OptionsModel is initialized or translations are loaded,
     // as it is used to locate QSettings
-    QApplication::setOrganizationName("Bitcoin");
-    QApplication::setOrganizationDomain("bitcoin.org");
+    QApplication::setOrganizationName("Cockcoin");
+    QApplication::setOrganizationDomain("cockcoin.org");
     if (isaTestNet) // Separate UI settings for testnets
-        QApplication::setApplicationName("Bitcoin-Qt-testnet");
+        QApplication::setApplicationName("Cockcoin-Qt-testnet");
     else
-        QApplication::setApplicationName("Bitcoin-Qt");
+        QApplication::setApplicationName("Cockcoin-Qt");
 
     /// 4. Initialization of translations, so that intro dialog is in user's language
     // Now that QSettings are accessible, initialize translations
@@ -503,7 +503,7 @@ int main(int argc, char *argv[])
     }
     // Now that translations are initialized, check for earlier errors and show a translatable error message
     if (fSelParFromCLFailed) {
-        QMessageBox::critical(0, QObject::tr("Bitcoin"), QObject::tr("Error: Invalid combination of -regtest and -testnet."));
+        QMessageBox::critical(0, QObject::tr("Cockcoin"), QObject::tr("Error: Invalid combination of -regtest and -testnet."));
         return 1;
     }
 
@@ -511,10 +511,10 @@ int main(int argc, char *argv[])
     // User language is set up: pick a data directory
     Intro::pickDataDirectory(isaTestNet);
 
-    /// 6. Determine availability of data directory and parse bitcoin.conf
+    /// 6. Determine availability of data directory and parse cockcoin.conf
     if (!boost::filesystem::is_directory(GetDataDir(false)))
     {
-        QMessageBox::critical(0, QObject::tr("Bitcoin"),
+        QMessageBox::critical(0, QObject::tr("Cockcoin"),
                               QObject::tr("Error: Specified data directory \"%1\" does not exist.").arg(QString::fromStdString(mapArgs["-datadir"])));
         return 1;
     }
@@ -531,7 +531,7 @@ int main(int argc, char *argv[])
         exit(0);
 
     // Start up the payment server early, too, so impatient users that click on
-    // bitcoin: links repeatedly have their payment requests routed to this process:
+    // cockcoin: links repeatedly have their payment requests routed to this process:
     app.createPaymentServer();
 #endif
 
@@ -569,4 +569,4 @@ int main(int argc, char *argv[])
     }
     return app.getReturnValue();
 }
-#endif // BITCOIN_QT_TEST
+#endif // COCKCOIN_QT_TEST

@@ -2,9 +2,9 @@ include $(top_srcdir)/src/Makefile.include
 
 AM_CPPFLAGS += -I$(top_srcdir)/src
 
-bin_PROGRAMS = test_bitcoin
+bin_PROGRAMS = test_cockcoin
 
-TESTS = test_bitcoin
+TESTS = test_cockcoin
 
 JSON_TEST_FILES = \
   data/script_valid.json \
@@ -21,16 +21,16 @@ RAW_TEST_FILES = data/alertTests.raw
 
 BUILT_SOURCES = $(JSON_TEST_FILES:.json=.json.h) $(RAW_TEST_FILES:.raw=.raw.h)
 
-# test_bitcoin binary #
-test_bitcoin_CPPFLAGS = $(AM_CPPFLAGS) $(TESTDEFS)
-test_bitcoin_LDADD = $(LIBBITCOIN_SERVER) $(LIBBITCOIN_CLI) $(LIBBITCOIN_COMMON) $(LIBLEVELDB) $(LIBMEMENV) \
+# test_cockcoin binary #
+test_cockcoin_CPPFLAGS = $(AM_CPPFLAGS) $(TESTDEFS)
+test_cockcoin_LDADD = $(LIBCOCKCOIN_SERVER) $(LIBCOCKCOIN_CLI) $(LIBCOCKCOIN_COMMON) $(LIBLEVELDB) $(LIBMEMENV) \
   $(BOOST_LIBS) $(BOOST_UNIT_TEST_FRAMEWORK_LIB)
 if ENABLE_WALLET
-test_bitcoin_LDADD += $(LIBBITCOIN_WALLET)
+test_cockcoin_LDADD += $(LIBCOCKCOIN_WALLET)
 endif
-test_bitcoin_LDADD += $(BDB_LIBS)
+test_cockcoin_LDADD += $(BDB_LIBS)
 
-test_bitcoin_SOURCES = \
+test_cockcoin_SOURCES = \
   alert_tests.cpp \
   allocator_tests.cpp \
   base32_tests.cpp \
@@ -55,7 +55,7 @@ test_bitcoin_SOURCES = \
   script_tests.cpp \
   serialize_tests.cpp \
   sigopcount_tests.cpp \
-  test_bitcoin.cpp \
+  test_cockcoin.cpp \
   transaction_tests.cpp \
   uint256_tests.cpp \
   util_tests.cpp \
@@ -63,12 +63,12 @@ test_bitcoin_SOURCES = \
   $(JSON_TEST_FILES) $(RAW_TEST_FILES)
 
 if ENABLE_WALLET
-test_bitcoin_SOURCES += \
+test_cockcoin_SOURCES += \
    accounting_tests.cpp \
    wallet_tests.cpp \
    rpc_wallet_tests.cpp
 endif
 
-nodist_test_bitcoin_SOURCES = $(BUILT_SOURCES)
+nodist_test_cockcoin_SOURCES = $(BUILT_SOURCES)
 
 CLEANFILES = *.gcda *.gcno $(BUILT_SOURCES)
